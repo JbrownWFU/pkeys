@@ -1,4 +1,4 @@
-# Project Title
+# Pkeys
 
 A simple Go CLI tool for AES-256 GCM encryption.
 
