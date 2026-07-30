@@ -15,7 +15,7 @@ A Go CLI tool for AES-256 GCM encryption — encrypt and decrypt text, files, or
 
 ## 📦 Installation
 
-Prebuilt releases are available for Mac, Linux and Windows.
+Prebuilt releases are available for Mac, Linux and Windows - see [releases](https://github.com/JbrownWFU/pkeys/releases)
 
 To build yourself:
 
@@ -58,6 +58,8 @@ Redirect to file
 pkeys generate -o key.txt
 ```
 
+---
+
 ### Encrypt
 Encrypt passed text content
 ```bash
@@ -80,6 +82,8 @@ pkeys encrypt "my secret" -o secret.enc
 pkeys encrypt -f mySecret.md -o mySecret.enc
 ```
 
+---
+
 ### Decrypt
 Decrypt passed ciphertext content
 ```bash
@@ -100,6 +104,19 @@ Redirect to file
 ```bash
 pkeys decrypt <ciphertext> -o secret.md
 pkeys decrypt -f mySecret.enc -o mySecret.md
+```
+
+---
+
+### Show
+Peek the currently set `PKEYS_KEY` 
+```bash
+pkeys show
+```
+
+Use `-s` to print the key in its entirety
+```bash
+pkeys show -s
 ```
 
 ## 📁 File Loading
