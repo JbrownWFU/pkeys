@@ -32,6 +32,10 @@ jobs:
         with:
           go-version-file: go.mod
 
+      - name: Install X11 headers (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: sudo apt-get update && sudo apt-get install -y libx11-dev
+
       - name: Build
         run: go build -ldflags "-X main.appVersion=${{ github.ref_name }}" -o dist/${{ matrix.binary_name }} .
 
