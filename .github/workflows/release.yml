@@ -1,0 +1,66 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            asset_name: pkeys-linux-amd64
+            binary_name: pkeys
+          - os: macos-latest
+            asset_name: pkeys-darwin-arm64
+            binary_name: pkeys
+          - os: windows-latest
+            asset_name: pkeys-windows-amd64
+            binary_name: pkeys.exe
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Build
+        run: go build -ldflags "-X main.appVersion=${{ github.ref_name }}" -o dist/${{ matrix.binary_name }} .
+
+      - name: Archive (Unix)
+        if: matrix.os != 'windows-latest'
+        run: tar -C dist -czf ${{ matrix.asset_name }}.tar.gz ${{ matrix.binary_name }}
+
+      - name: Archive (Windows)
+        if: matrix.os == 'windows-latest'
+        run: Compress-Archive -Path dist/${{ matrix.binary_name }} -DestinationPath ${{ matrix.asset_name }}.zip
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.asset_name }}
+          path: |
+            ${{ matrix.asset_name }}.tar.gz
+            ${{ matrix.asset_name }}.zip
+          if-no-files-found: ignore
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/*

@@ -1,0 +1,18 @@
+# Build artifacts
+/pkeys
+/pkeys.exe
+*.exe
+/dist
+
+# Go
+*.test
+*.out
+
+# OS / editor cruft
+.DS_Store
+
+# Old v1 project kept locally for reference only
+/ref/
+
+# Working docs, not meant to be tracked
+/docs/
