@@ -42,7 +42,7 @@ func (c *GenerateCmd) Run() error {
 	if c.Shell {
 		switch runtime.GOOS {
 		case "windows":
-			fmt.Printf("Manually edit your system variables (Settings -> System Variables) and add:\n\nPKEYS_PASS = %s\n\nOr set through terminal: \n\nsetx PKEYS_KEY %s\n\nOpen a new terminal window to reload\n", key, key)
+			fmt.Printf("Manually edit your system variables (Settings -> System Variables) and add:\n\nPKEYS_KEY = %s\n\nOr set through terminal: \n\nsetx PKEYS_KEY %s\n\nOpen a new terminal window to reload\n", key, key)
 			return nil
 		default:
 			// Mac / Linux
