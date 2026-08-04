@@ -4,7 +4,6 @@ package commands
 import (
 	"encoding/hex"
 	"fmt"
-	"io"
 	"os"
 	"strings"
 
@@ -21,31 +20,9 @@ type DecryptCmd struct {
 
 // Decrypt
 func (c *DecryptCmd) Run() error {
-	var hexData []byte
-
-	// Read in filepath
-	if c.File != "" {
-		f, err := os.Open(c.File)
-		if err != nil {
-			return err
-		}
-		defer f.Close()
-
-		hexData, err = io.ReadAll(f)
-		if err != nil {
-			return err
-		}
-
-	} else if c.Content != "" {
-		// Read in passed text
-		hexData = []byte(c.Content)
-	} else {
-		// Read from clipboard
-		clipData, err := clipboardio.Read()
-		if err != nil {
-			return fmt.Errorf("could not read clipboard contents: %w", err)
-		}
-		hexData = clipData
+	hexData, err := resolveInput(c.Content, c.File, c.Clipboard)
+	if err != nil {
+		return err
 	}
 
 	// Decode hex ciphertext
@@ -103,9 +80,6 @@ func (c *DecryptCmd) Run() error {
 func (c *DecryptCmd) Validate() error {
 	if c.Content != "" && c.File != "" {
 		return fmt.Errorf("cannot pass both content and -f/--file")
-	}
-	if c.Content == "" && c.File == "" && !c.Clipboard {
-		return fmt.Errorf("must pass either content, -f/--file, or -c/--clipboard")
 	}
 	return nil
 }

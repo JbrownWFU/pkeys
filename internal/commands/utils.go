@@ -2,10 +2,61 @@ package commands
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"time"
+
+	"pkeys/internal/clipboardio"
 )
+
+// resolveInput determines the input bytes for encrypt/decrypt, in order of
+// precedence: positional content, -f/--file, -c/--clipboard, piped stdin,
+// falling back to the clipboard if stdin isn't piped (e.g. bare invocation
+// in an interactive terminal).
+func resolveInput(content string, file string, useClipboard bool) ([]byte, error) {
+	switch {
+	case file != "":
+		f, err := os.Open(file)
+		if err != nil {
+			return nil, err
+		}
+		defer f.Close()
+
+		return io.ReadAll(f)
+
+	case content != "":
+		return []byte(content), nil
+
+	case useClipboard:
+		data, err := clipboardio.Read()
+		if err != nil {
+			return nil, fmt.Errorf("could not read clipboard contents: %w", err)
+		}
+		return data, nil
+
+	default:
+		if isStdinPiped() {
+			return io.ReadAll(os.Stdin)
+		}
+
+		data, err := clipboardio.Read()
+		if err != nil {
+			return nil, fmt.Errorf("could not read clipboard contents: %w", err)
+		}
+		return data, nil
+	}
+}
+
+// isStdinPiped reports whether stdin is connected to a pipe/redirect rather
+// than an interactive terminal.
+func isStdinPiped() bool {
+	stat, err := os.Stdin.Stat()
+	if err != nil {
+		return false
+	}
+	return (stat.Mode() & os.ModeCharDevice) == 0
+}
 
 // Resolve user passed paths and return final path with default name if needed
 func resolvePath(path string, name string, ext string) (string, error) {
